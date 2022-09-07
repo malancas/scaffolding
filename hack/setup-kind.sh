@@ -131,6 +131,7 @@ echo '::endgroup::'
 echo '::group:: Build KinD Config'
 
 cat > kind.yaml <<EOF
+---
 apiVersion: kind.x-k8s.io/v1alpha4
 kind: Cluster
 nodes:
@@ -153,6 +154,7 @@ containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."$REGISTRY_NAME:$REGISTRY_PORT"]
     endpoint = ["http://$REGISTRY_NAME:$REGISTRY_PORT"]
+    systemdCgroup = true
 
 # This is needed in order to support projected volumes with service account tokens.
 # See: https://kubernetes.slack.com/archives/CEKK1KTN2/p1600268272383600
@@ -171,6 +173,10 @@ kubeadmConfigPatches:
         "service-account-jwks-uri": "https://kubernetes.default.svc/openid/v1/jwks"
     networking:
       dnsDomain: "${CLUSTER_SUFFIX}"
+  - |
+    apiVersion: kubelet.config.k8s.io/v1beta1
+    kind: KubeletConfiguration
+    cgroupDriver: systemd
 EOF_3
 
 cat kind.yaml
