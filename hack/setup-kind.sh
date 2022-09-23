@@ -64,6 +64,10 @@ while [[ $# -ne 0 ]]; do
   shift
 done
 
+## check what cgroup driver and version Docker is using
+
+CGROUPS_CONFIGS=($(docker info --format '{{json .}}' | jq -r '.CgroupDriver, .CgroupVersion'))
+
 # The version map correlated with this version of KinD
 KIND_VERSION="v0.14.0"
 case ${K8S_VERSION} in
@@ -131,7 +135,6 @@ echo '::endgroup::'
 echo '::group:: Build KinD Config'
 
 cat > kind.yaml <<EOF
----
 apiVersion: kind.x-k8s.io/v1alpha4
 kind: Cluster
 nodes:
